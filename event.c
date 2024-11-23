@@ -33,7 +33,10 @@ void event_init(Event *event, System *system, Resource *resource, int status, in
  *
  * @param[out] queue  Pointer to the `EventQueue` to initialize.
  */
-void event_queue_init(EventQueue *queue) {}
+void event_queue_init(EventQueue *queue) {
+    queue->head = NULL;   // Init queue head to NULL
+    queue->size = 0;      // Init queue size to 0
+}
 
 /**
  * Cleans up the `EventQueue`.
@@ -42,7 +45,16 @@ void event_queue_init(EventQueue *queue) {}
  * 
  * @param[in,out] queue  Pointer to the `EventQueue` to clean.
  */
-void event_queue_clean(EventQueue *queue) {}
+void event_queue_clean(EventQueue *queue) {
+    EventNode *current = queue->head;
+    while (current != NULL) {
+        EventNode *next = current->next;
+        free(current);    // Free each node
+        current = next;
+    }
+    queue->head = NULL;   // Reset queue
+    queue->size = 0;
+}
 
 /**
  * Pushes an `Event` onto the `EventQueue`.
@@ -52,7 +64,26 @@ void event_queue_clean(EventQueue *queue) {}
  * @param[in,out] queue  Pointer to the `EventQueue`.
  * @param[in]     event  Pointer to the `Event` to push onto the queue.
  */
-void event_queue_push(EventQueue *queue, const Event *event) {}
+void event_queue_push(EventQueue *queue, const Event *event) {
+    EventNode *new_node = malloc(sizeof(EventNode));
+    if (new_node == NULL) {
+        fprintf(stderr, "Error: Failed to allocate memory for EventNode.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    new_node->event = *event;    // Copy event
+    new_node->next = NULL;
+
+    // Insert by priority
+    EventNode **current = &queue->head;
+    while (*current != NULL && (*current)->event.priority >= event->priority) {
+        current = &(*current)->next;
+    }
+    new_node->next = *current;  // Insert new node
+    *current = new_node;
+
+    queue->size++;              // Inc size
+}
 
 /**
  * Pops an `Event` from the `EventQueue`.
@@ -64,7 +95,15 @@ void event_queue_push(EventQueue *queue, const Event *event) {}
  * @return               Non-zero if an event was successfully popped; zero otherwise.
  */
 int event_queue_pop(EventQueue *queue, Event *event) {
-    // Temporarily, this only returns 0 so that it is ignored 
-    // during early testing. Replace this with the correct logic.
-    return 0;
+    if (queue->head == NULL) {
+        return 0;   // Queue empty
+    }
+
+    EventNode *to_remove = queue->head;
+    *event = to_remove->event;   // Copy event
+    queue->head = to_remove->next;
+    free(to_remove);             // Free node
+    queue->size--;               // Dec size
+
+    return 1;   // Pop success
 }
