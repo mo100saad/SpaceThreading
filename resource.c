@@ -33,14 +33,33 @@ void resource_create(Resource **resource, const char *name, int amount, int max_
     (*resource)->amount = amount;
     (*resource)->max_capacity = max_capacity;
 }
-//Resource Ammount with 3 paramet
+
+/**
+ * Initializes a `ResourceAmount` object.
+ *
+ * Sets up a resource amount with the associated resource and amount.
+ *
+ * @param[out] resource_amount  Pointer to the `ResourceAmount` to initialize.
+ * @param[in]  resource         Pointer to the `Resource` object.
+ * @param[in]  amount           Amount of the resource.
+ */
 void resource_amount_init(ResourceAmount *resource_amount, Resource *resource, int amount) {
     if (resource_amount == NULL || resource == NULL) {
         fprintf(stderr, "Error: NULL pointer passed to resource_amount_init.\n");
+        if (resource_amount == NULL) {
+            fprintf(stderr, "Debug: resource_amount is NULL.\n");
+        }
+        if (resource == NULL) {
+            fprintf(stderr, "Debug: resource is NULL.\n");
+        }
         exit(EXIT_FAILURE);
     }
+
     resource_amount->resource = resource;
     resource_amount->amount = amount;
+
+    // Debugging
+    printf("Debug: Initialized ResourceAmount - Resource Name: %s, Amount: %d\n", resource->name, amount);
 }
 
 
@@ -108,6 +127,11 @@ void resource_array_clean(ResourceArray *array) {
  * @param[in]     resource  Pointer to the `Resource` to add.
  */
 void resource_array_add(ResourceArray *array, Resource *resource) {
+    if (resource == NULL) {
+    fprintf(stderr, "Error: NULL resource passed to resource_array_add.\n");
+    exit(EXIT_FAILURE);
+    }
+
     if (array->size == array->capacity) {
         // Double capacity
         int new_capacity = array->capacity * 2;
