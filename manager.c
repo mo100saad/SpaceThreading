@@ -137,3 +137,4 @@ static void display_simulation_state(Manager *manager) {
     fflush(stdout);
 
     last_display_time = current_time;
+}
