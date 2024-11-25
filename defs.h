@@ -1,5 +1,5 @@
 #include <semaphore.h>
-
+#include <pthread.h>
 // Don't worry about these! These are special codes that allow us to do some formatting in the terminal
 // Such as clearing the line before printing or moving the location of the "cursor" that will print.
 #define ANSI_CLEAR "\033[2J"
@@ -32,9 +32,10 @@
 
 // Represents the resource amounts for the entire rocket
 typedef struct Resource {
-    char *name;      // Dynamically allocated string
-    int amount;
-    int max_capacity;
+    char *name;              // Dynamically allocated string
+    int amount;              // Current amount of the resource
+    int max_capacity;        // Maximum capacity of the resource
+    pthread_mutex_t mutex;   // Mutex to ensure thread-safe operations
 } Resource;
 
 // Represents the amount of a resource consumed/produced for a single system

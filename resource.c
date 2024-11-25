@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <pthread.h>
 
 /* Resource functions */
 
@@ -9,7 +10,7 @@
  * Creates a new `Resource` object.
  *
  * Allocates memory for a new `Resource` and initializes its fields.
- * The `name` is dynamically allocated.
+ * The `name` is dynamically allocated, and a mutex is initialized for thread safety.
  *
  * @param[out] resource      Pointer to the `Resource*` to be allocated and initialized.
  * @param[in]  name          Name of the resource (the string is copied).
@@ -23,7 +24,7 @@ void resource_create(Resource **resource, const char *name, int amount, int max_
         exit(EXIT_FAILURE);
     }
 
-    (*resource)->name = strdup(name);
+    (*resource)->name = strdup(name);  // Duplicate the resource name
     if ((*resource)->name == NULL) {
         fprintf(stderr, "Error: Memory allocation failed for Resource name.\n");
         free(*resource);
@@ -32,34 +33,39 @@ void resource_create(Resource **resource, const char *name, int amount, int max_
 
     (*resource)->amount = amount;
     (*resource)->max_capacity = max_capacity;
+
+    // Initialize the mutex
+    if (pthread_mutex_init(&(*resource)->mutex, NULL) != 0) {
+        fprintf(stderr, "Error: Failed to initialize mutex for Resource.\n");
+        free((*resource)->name);
+        free(*resource);
+        exit(EXIT_FAILURE);
+    }
 }
 
 /**
- * Initializes a `ResourceAmount` object.
+ * Initializes a `ResourceAmount` structure.
  *
- * Sets up a resource amount with the associated resource and amount.
+ * Links a `Resource` to a specific `amount` value.
  *
  * @param[out] resource_amount  Pointer to the `ResourceAmount` to initialize.
- * @param[in]  resource         Pointer to the `Resource` object.
- * @param[in]  amount           Amount of the resource.
+ * @param[in]  resource         Pointer to the `Resource`.
+ * @param[in]  amount           The amount of the resource to associate.
  */
 void resource_amount_init(ResourceAmount *resource_amount, Resource *resource, int amount) {
     if (resource_amount == NULL) {
         fprintf(stderr, "Error: NULL pointer passed to resource_amount_init.\n");
         exit(EXIT_FAILURE);
     }
-
     if (resource == NULL) {
-        printf("Debug: Resource is NULL, initializing ResourceAmount without a resource.\n");
+        // Allow NULL resource for scenarios like "produce_none"
+        resource_amount->resource = NULL;
+        resource_amount->amount = 0;
+        printf("Debug: Resource is NULL in resource_amount_init. Allowed for cases like 'produce_none'.\n");
+        return;
     }
-
     resource_amount->resource = resource;
     resource_amount->amount = amount;
-    if (resource != NULL) {
-        printf("Debug: Initialized ResourceAmount - Resource Name: %s, Amount: %d\n", resource->name, amount);
-    } else {
-        printf("Debug: Initialized ResourceAmount - No resource, Amount: %d\n", amount);
-    }
 }
 
 
@@ -67,7 +73,7 @@ void resource_amount_init(ResourceAmount *resource_amount, Resource *resource, i
 /**
  * Destroys a `Resource` object.
  *
- * Frees all memory associated with the `Resource`.
+ * Frees all memory associated with the `Resource`, including the mutex.
  *
  * @param[in,out] resource  Pointer to the `Resource` to be destroyed.
  */
@@ -76,6 +82,8 @@ void resource_destroy(Resource *resource) {
         return;
     }
 
+    // Destroy the mutex
+    pthread_mutex_destroy(&resource->mutex);
     free(resource->name);
     free(resource);
 }
@@ -90,7 +98,7 @@ void resource_destroy(Resource *resource) {
  * @param[out] array  Pointer to the `ResourceArray` to initialize.
  */
 void resource_array_init(ResourceArray *array) {
-    array->resources = malloc(sizeof(Resource *) * 1); // Start with capacity 1
+    array->resources = malloc(sizeof(Resource *) * 1);  // Start with capacity 1
     if (array->resources == NULL) {
         fprintf(stderr, "Error: Memory allocation failed for ResourceArray.\n");
         exit(EXIT_FAILURE);
@@ -128,13 +136,8 @@ void resource_array_clean(ResourceArray *array) {
  * @param[in]     resource  Pointer to the `Resource` to add.
  */
 void resource_array_add(ResourceArray *array, Resource *resource) {
-    if (resource == NULL) {
-    fprintf(stderr, "Error: NULL resource passed to resource_array_add.\n");
-    exit(EXIT_FAILURE);
-    }
-
     if (array->size == array->capacity) {
-        // Double capacity
+        // Double the capacity
         int new_capacity = array->capacity * 2;
         Resource **new_resources = malloc(sizeof(Resource *) * new_capacity);
         if (new_resources == NULL) {
@@ -142,7 +145,7 @@ void resource_array_add(ResourceArray *array, Resource *resource) {
             exit(EXIT_FAILURE);
         }
 
-        // Copy old resources
+        // Copy old resources to the new array
         for (int i = 0; i < array->size; i++) {
             new_resources[i] = array->resources[i];
         }
@@ -152,5 +155,5 @@ void resource_array_add(ResourceArray *array, Resource *resource) {
         array->capacity = new_capacity;
     }
 
-    array->resources[array->size++] = resource;
+    array->resources[array->size++] = resource;  // Add the new resource
 }

@@ -43,27 +43,29 @@ int main(void) {
 void load_data(Manager *manager) {
     Resource *fuel, *oxygen, *energy, *distance;
 
-    // Create resources with names, initial amounts, and capacities
     printf("Debug: Creating resources...\n");
+
+    // Create resources
     resource_create(&fuel, "Fuel", 1000, 1000);
+    printf("Debug: Created resource Fuel\n");
+
     resource_create(&oxygen, "Oxygen", 20, 50);
+    printf("Debug: Created resource Oxygen\n");
+
     resource_create(&energy, "Energy", 30, 50);
+    printf("Debug: Created resource Energy\n");
+
     resource_create(&distance, "Distance", 0, 5000);
+    printf("Debug: Created resource Distance\n");
 
-    // Verify resources are initialized
-    if (fuel == NULL || oxygen == NULL || energy == NULL || distance == NULL) {
-        fprintf(stderr, "Error: One or more resources failed to initialize.\n");
-        exit(EXIT_FAILURE);
-    }
-
-    // Add resources to the manager's resource array
+    // Add resources to ResourceArray
     printf("Debug: Adding resources to ResourceArray...\n");
     resource_array_add(&manager->resource_array, fuel);
     resource_array_add(&manager->resource_array, oxygen);
     resource_array_add(&manager->resource_array, energy);
     resource_array_add(&manager->resource_array, distance);
 
-    // Create systems with specific consumption and production requirements
+    // Create systems
     System *propulsion, *life_support, *crew_capsule, *generator;
 
     ResourceAmount consume_fuel, produce_distance;
@@ -80,8 +82,21 @@ void load_data(Manager *manager) {
 
     ResourceAmount consume_oxygen, produce_none;
     printf("Debug: Initializing ResourceAmount for crew capsule...\n");
+    printf("Debug: Oxygen Resource Pointer: %p, Name: %s, Amount: %d, Max: %d\n", 
+        (void *)oxygen, oxygen ? oxygen->name : "NULL", 
+        oxygen ? oxygen->amount : -1, oxygen ? oxygen->max_capacity : -1);
+
+    if (oxygen == NULL) {
+        printf("Error: Oxygen resource is NULL before initializing ResourceAmount for crew capsule.\n");
+        exit(EXIT_FAILURE);
+    }
+    printf("Debug: Passing to resource_amount_init: Resource Pointer: %p\n", (void *)oxygen);
     resource_amount_init(&consume_oxygen, oxygen, 1);
-    resource_amount_init(&produce_none, NULL, 0);
+    // Skip initializing produce_none directly since it is NULL
+    produce_none.resource = NULL;
+    produce_none.amount = 0;
+
+    system_create(&crew_capsule, "Crew", consume_oxygen, produce_none, 2, &manager->event_queue);
     system_create(&crew_capsule, "Crew", consume_oxygen, produce_none, 2, &manager->event_queue);
 
     ResourceAmount consume_fuel_energy, produce_energy;
@@ -91,7 +106,6 @@ void load_data(Manager *manager) {
     system_create(&generator, "Generator", consume_fuel_energy, produce_energy, 20, &manager->event_queue);
 
     // Add systems to the manager's system array
-    printf("Debug: Adding systems to SystemArray...\n");
     system_array_add(&manager->system_array, propulsion);
     system_array_add(&manager->system_array, life_support);
     system_array_add(&manager->system_array, crew_capsule);

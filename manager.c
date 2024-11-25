@@ -5,19 +5,19 @@
 #include <unistd.h>
 #include <string.h>
 
-// Static function for displaying the simulation state
+// Static function to display the simulation state
 static void display_simulation_state(Manager *manager);
+
+// Thread function for running a single system
+static void *system_thread_func(void *arg);
 
 /**
  * Initializes the `Manager`.
  *
- * Sets up the manager by initializing the system array, resource array, and event queue.
- * Prepares the simulation to be run.
- *
- * @param[out] manager  Pointer to the `Manager` to initialize.
+ * Prepares the manager by initializing all arrays and the event queue.
  */
 void manager_init(Manager *manager) {
-    manager->simulation_running = 1; // Any non-zero value to indicate the simulation is running
+    manager->simulation_running = 1; // Set simulation as running
     system_array_init(&manager->system_array);
     resource_array_init(&manager->resource_array);
     event_queue_init(&manager->event_queue);
@@ -26,9 +26,7 @@ void manager_init(Manager *manager) {
 /**
  * Cleans up the `Manager`.
  *
- * Frees all resources associated with the manager.
- *
- * @param[in,out] manager  Pointer to the `Manager` to clean.
+ * Frees resources, systems, and events.
  */
 void manager_clean(Manager *manager) {
     system_array_clean(&manager->system_array);
@@ -37,10 +35,71 @@ void manager_clean(Manager *manager) {
 }
 
 /**
- * Thread function for running a single system.
+ * Runs the simulation manager loop.
  *
- * @param[in] arg  Pointer to the `System` to be run.
- * @return         NULL (no return value).
+ * Handles threads, processes events, and terminates the simulation if critical resources are depleted.
+ */
+void manager_run(Manager *manager) {
+    pthread_t threads[manager->system_array.size];
+
+    // Validate systems
+    if (manager->system_array.size == 0) {
+        fprintf(stderr, "Error: No systems available to run.\n");
+        manager->simulation_running = 0;
+        return;
+    }
+
+    // Create threads for each system
+    for (int i = 0; i < manager->system_array.size; i++) {
+        if (pthread_create(&threads[i], NULL, system_thread_func, manager->system_array.systems[i]) != 0) {
+            fprintf(stderr, "Error: Failed to create thread for system.\n");
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    // Main manager loop
+    while (manager->simulation_running) {
+        Event event;
+
+        // Process events if any exist
+        while (event_queue_pop(&manager->event_queue, &event)) {
+            printf("Event: [%s] Resource [%s] Status [%d] Priority [%d]\n",
+                   event.system->name,
+                   event.resource->name,
+                   event.status,
+                   event.priority);
+
+            // Critical condition: stop simulation if oxygen or fuel is empty
+            if (event.status == STATUS_EMPTY && 
+               (strcmp(event.resource->name, "Oxygen") == 0 || strcmp(event.resource->name, "Fuel") == 0)) {
+                printf("Critical resource [%s] depleted by system [%s].\n", event.resource->name, event.system->name);
+                manager->simulation_running = 0;
+
+                // Set all systems to TERMINATE
+                for (int i = 0; i < manager->system_array.size; i++) {
+                    manager->system_array.systems[i]->status = TERMINATE;
+                }
+                break;
+            }
+        }
+
+        // Display simulation state periodically
+        display_simulation_state(manager);
+        usleep(MANAGER_WAIT_TIME * 1000);
+    }
+
+    // Wait for threads to finish
+    for (int i = 0; i < manager->system_array.size; i++) {
+        pthread_join(threads[i], NULL);
+    }
+}
+
+
+/**
+ * Thread function to run individual systems.
+ *
+ * @param[in] arg  Pointer to the `System` to run.
+ * @return         NULL.
  */
 static void *system_thread_func(void *arg) {
     System *system = (System *)arg;
@@ -53,70 +112,9 @@ static void *system_thread_func(void *arg) {
 }
 
 /**
- * Runs the manager loop.
- *
- * Handles event processing, updates system statuses, and displays the simulation state.
- * Continues until the simulation is no longer running.
- *
- * @param[in,out] manager  Pointer to the `Manager`.
- */
-void manager_run(Manager *manager) {
-    pthread_t threads[manager->system_array.size];
-
-    // Launch threads for each system
-    for (int i = 0; i < manager->system_array.size; i++) {
-        if (pthread_create(&threads[i], NULL, system_thread_func, manager->system_array.systems[i]) != 0) {
-            fprintf(stderr, "Error: Failed to create thread for system.\n");
-            exit(EXIT_FAILURE);
-        }
-    }
-
-    // Main manager loop
-    while (manager->simulation_running) {
-        Event event;
-
-        // Process events if one is available
-        while (event_queue_pop(&manager->event_queue, &event)) {
-            printf("Event: [%s] Resource [%s] Status [%d] Priority [%d]\n",
-                   event.system->name,
-                   event.resource->name,
-                   event.status,
-                   event.priority);
-
-            // Example: Stop simulation if critical resources like oxygen or fuel are depleted
-            if (event.status == STATUS_EMPTY) {
-                printf("Critical resource [%s] depleted by system [%s].\n",
-                       event.resource->name, event.system->name);
-
-                if (strcmp(event.resource->name, "Oxygen") == 0 || strcmp(event.resource->name, "Fuel") == 0) {
-                    printf("Simulation terminated due to critical resource depletion.\n");
-                    manager->simulation_running = 0;
-                }
-            }
-        }
-
-        // Display simulation state periodically
-        display_simulation_state(manager);
-        usleep(MANAGER_WAIT_TIME * 1000);
-    }
-
-    // Signal threads to terminate
-    for (int i = 0; i < manager->system_array.size; i++) {
-        manager->system_array.systems[i]->status = TERMINATE;
-    }
-
-    // Wait for threads to finish
-    for (int i = 0; i < manager->system_array.size; i++) {
-        pthread_join(threads[i], NULL);
-    }
-}
-
-/**
  * Displays the current simulation state.
  *
- * Outputs the statuses of resources and systems to the console.
- *
- * @param[in] manager  Pointer to the `Manager` containing the simulation state.
+ * Outputs the statuses of all resources and systems to the console.
  */
 static void display_simulation_state(Manager *manager) {
     static const int display_interval = 1; // Update interval in seconds
@@ -131,21 +129,22 @@ static void display_simulation_state(Manager *manager) {
     printf("Current Resource Amounts:\n");
     printf("-------------------------\n");
 
+    // Display resources
     for (int i = 0; i < manager->resource_array.size; i++) {
         Resource *resource = manager->resource_array.resources[i];
+        pthread_mutex_lock(&resource->mutex);
         printf("%s: %d / %d\n", resource->name, resource->amount, resource->max_capacity);
+        pthread_mutex_unlock(&resource->mutex);
     }
 
     printf("\nSystem Statuses:\n");
     printf("---------------\n");
 
+    // Display systems
     for (int i = 0; i < manager->system_array.size; i++) {
         System *system = manager->system_array.systems[i];
-        printf("%s: %s\n", system->name,
-               system->status == TERMINATE ? "TERMINATE" :
-               system->status == SLOW ? "SLOW" :
-               system->status == STANDARD ? "STANDARD" :
-               system->status == FAST ? "FAST" : "UNKNOWN");
+        printf("%s: %s\n", system->name, 
+               (system->status == TERMINATE) ? "TERMINATE" : "ACTIVE");
     }
 
     printf("\n");
