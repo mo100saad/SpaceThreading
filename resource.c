@@ -44,23 +44,24 @@ void resource_create(Resource **resource, const char *name, int amount, int max_
  * @param[in]  amount           Amount of the resource.
  */
 void resource_amount_init(ResourceAmount *resource_amount, Resource *resource, int amount) {
-    if (resource_amount == NULL || resource == NULL) {
+    if (resource_amount == NULL) {
         fprintf(stderr, "Error: NULL pointer passed to resource_amount_init.\n");
-        if (resource_amount == NULL) {
-            fprintf(stderr, "Debug: resource_amount is NULL.\n");
-        }
-        if (resource == NULL) {
-            fprintf(stderr, "Debug: resource is NULL.\n");
-        }
         exit(EXIT_FAILURE);
+    }
+
+    if (resource == NULL) {
+        printf("Debug: Resource is NULL, initializing ResourceAmount without a resource.\n");
     }
 
     resource_amount->resource = resource;
     resource_amount->amount = amount;
-
-    // Debugging
-    printf("Debug: Initialized ResourceAmount - Resource Name: %s, Amount: %d\n", resource->name, amount);
+    if (resource != NULL) {
+        printf("Debug: Initialized ResourceAmount - Resource Name: %s, Amount: %d\n", resource->name, amount);
+    } else {
+        printf("Debug: Initialized ResourceAmount - No resource, Amount: %d\n", amount);
+    }
 }
+
 
 
 /**
