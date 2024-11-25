@@ -14,22 +14,18 @@ void load_data(Manager *manager);
 int main(void) {
     Manager manager;
 
-    // Init manager
+    // Step 1: Initialize the manager
     manager_init(&manager);
 
-    // Load sim data
+    // Step 2: Load the data into the simulation
     load_data(&manager);
 
-    // Run sim loop
-    while (manager.simulation_running) {
-        manager_run(&manager);
-        for (int i = 0; i < manager.system_array.size; ++i) {
-            system_run(manager.system_array.systems[i]);
-        }
-    }
+    // Step 3: Start and manage the simulation
+    manager_run(&manager);
 
-    // Clean up
+    // Step 4: Clean up resources and terminate
     manager_clean(&manager);
+
     return 0;
 }
 
@@ -43,18 +39,19 @@ int main(void) {
 void load_data(Manager *manager) {
     Resource *fuel, *oxygen, *energy, *distance;
 
-    // Create resources
+    // Create resources with names, initial amounts, and capacities
     resource_create(&fuel, "Fuel", 1000, 1000);
     resource_create(&oxygen, "Oxygen", 20, 50);
     resource_create(&energy, "Energy", 30, 50);
     resource_create(&distance, "Distance", 0, 5000);
 
+    // Add resources to the manager's resource array
     resource_array_add(&manager->resource_array, fuel);
     resource_array_add(&manager->resource_array, oxygen);
     resource_array_add(&manager->resource_array, energy);
     resource_array_add(&manager->resource_array, distance);
 
-    // Create systems
+    // Create systems with specific consumption and production requirements
     System *propulsion, *life_support, *crew_capsule, *generator;
 
     ResourceAmount consume_fuel, produce_distance;
@@ -77,6 +74,7 @@ void load_data(Manager *manager) {
     resource_amount_init(&produce_energy, energy, 10);
     system_create(&generator, "Generator", consume_fuel_energy, produce_energy, 20, &manager->event_queue);
 
+    // Add systems to the manager's system array
     system_array_add(&manager->system_array, propulsion);
     system_array_add(&manager->system_array, life_support);
     system_array_add(&manager->system_array, crew_capsule);

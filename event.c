@@ -3,6 +3,26 @@
 #include <stdio.h>
 
 /**
+ * Initializes an `Event` structure.
+ *
+ * Sets up an `Event` with the provided system, resource, status, priority, and amount.
+ *
+ * @param[out] event     Pointer to the `Event` to initialize.
+ * @param[in]  system    Pointer to the `System` that generated the event.
+ * @param[in]  resource  Pointer to the `Resource` associated with the event.
+ * @param[in]  status    Status code representing the event type.
+ * @param[in]  priority  Priority level of the event.
+ * @param[in]  amount    Amount related to the event (e.g., resource amount).
+ */
+void event_init(Event *event, System *system, Resource *resource, int status, int priority, int amount) {
+    event->system = system;
+    event->resource = resource;
+    event->status = status;
+    event->priority = priority;
+    event->amount = amount;
+}
+
+/**
  * Initializes the `EventQueue`.
  *
  * Sets up the queue for use, initializing any necessary data.

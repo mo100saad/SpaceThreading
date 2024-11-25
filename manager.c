@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <string.h>
 
 // Static function for displaying the simulation state
 static void display_simulation_state(Manager *manager);
@@ -82,16 +83,26 @@ void manager_run(Manager *manager) {
                    event.status,
                    event.priority);
 
-            // Example: Stop simulation if oxygen or fuel is empty
-            if (event.status == STATUS_EMPTY && (strcmp(event.resource->name, "Oxygen") == 0 || strcmp(event.resource->name, "Fuel") == 0)) {
-                printf("Critical resource depleted. Terminating simulation.\n");
-                manager->simulation_running = 0;
+            // Example: Stop simulation if critical resources like oxygen or fuel are depleted
+            if (event.status == STATUS_EMPTY) {
+                printf("Critical resource [%s] depleted by system [%s].\n",
+                       event.resource->name, event.system->name);
+
+                if (strcmp(event.resource->name, "Oxygen") == 0 || strcmp(event.resource->name, "Fuel") == 0) {
+                    printf("Simulation terminated due to critical resource depletion.\n");
+                    manager->simulation_running = 0;
+                }
             }
         }
 
         // Display simulation state periodically
         display_simulation_state(manager);
         usleep(MANAGER_WAIT_TIME * 1000);
+    }
+
+    // Signal threads to terminate
+    for (int i = 0; i < manager->system_array.size; i++) {
+        manager->system_array.systems[i]->status = TERMINATE;
     }
 
     // Wait for threads to finish
@@ -130,7 +141,11 @@ static void display_simulation_state(Manager *manager) {
 
     for (int i = 0; i < manager->system_array.size; i++) {
         System *system = manager->system_array.systems[i];
-        printf("%s: %s\n", system->name, system->status == TERMINATE ? "TERMINATE" : "ACTIVE");
+        printf("%s: %s\n", system->name,
+               system->status == TERMINATE ? "TERMINATE" :
+               system->status == SLOW ? "SLOW" :
+               system->status == STANDARD ? "STANDARD" :
+               system->status == FAST ? "FAST" : "UNKNOWN");
     }
 
     printf("\n");

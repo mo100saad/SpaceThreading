@@ -33,6 +33,16 @@ void resource_create(Resource **resource, const char *name, int amount, int max_
     (*resource)->amount = amount;
     (*resource)->max_capacity = max_capacity;
 }
+//Resource Ammount with 3 paramet
+void resource_amount_init(ResourceAmount *resource_amount, Resource *resource, int amount) {
+    if (resource_amount == NULL || resource == NULL) {
+        fprintf(stderr, "Error: NULL pointer passed to resource_amount_init.\n");
+        exit(EXIT_FAILURE);
+    }
+    resource_amount->resource = resource;
+    resource_amount->amount = amount;
+}
+
 
 /**
  * Destroys a `Resource` object.
