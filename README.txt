@@ -20,9 +20,7 @@ Makefile
 Compile Using make:
 
 Run the following command:
-sh
-Copy code
-make
+    - make
 
 
 This will create an executable file named cuinspace.
@@ -30,25 +28,19 @@ This will create an executable file named cuinspace.
 Run the Program:
 
 Execute the compiled program with:
-sh
-Copy code
-./cuinspace
+    - ./cuinspace
 
 
 Clean Up Build Artifacts:
 
 To remove object files and the executable:
-sh
-Copy code
-make clean
+    - make clean
 
 
 Optional Debugging and Memory Check:
 
 To test for memory leaks and invalid memory usage, use:
-sh
-Copy code
-valgrind --leak-check=full --track-origins=yes ./cuinspace
+    - valgrind --leak-check=full --track-origins=yes ./cuinspace
 
 
 Citations

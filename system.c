@@ -54,10 +54,14 @@ void system_create(System **system, const char *name, ResourceAmount consumed, R
  */
 void system_destroy(System *system) {
     if (system != NULL) {
-        free(system->name); // Free dynamically allocated name
-        free(system);       // Free the System object itself
+        if (system->name != NULL) {
+            printf("Debug: Freeing system name: %s\n", system->name);
+            free(system->name); // Free dynamically allocated name
+        }
+        free(system); // Free the System
     }
 }
+
 
 /**
  * Runs the main loop for a `System`.

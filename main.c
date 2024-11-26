@@ -87,16 +87,15 @@ void load_data(Manager *manager) {
         oxygen ? oxygen->amount : -1, oxygen ? oxygen->max_capacity : -1);
 
     if (oxygen == NULL) {
-        printf("Error: Oxygen resource is NULL before initializing ResourceAmount for crew capsule.\n");
+        fprintf(stderr, "Error: Oxygen resource is NULL before initializing ResourceAmount for crew capsule.\n");
         exit(EXIT_FAILURE);
     }
     printf("Debug: Passing to resource_amount_init: Resource Pointer: %p\n", (void *)oxygen);
     resource_amount_init(&consume_oxygen, oxygen, 1);
-    // Skip initializing produce_none directly since it is NULL
+
     produce_none.resource = NULL;
     produce_none.amount = 0;
 
-    system_create(&crew_capsule, "Crew", consume_oxygen, produce_none, 2, &manager->event_queue);
     system_create(&crew_capsule, "Crew", consume_oxygen, produce_none, 2, &manager->event_queue);
 
     ResourceAmount consume_fuel_energy, produce_energy;
@@ -106,8 +105,11 @@ void load_data(Manager *manager) {
     system_create(&generator, "Generator", consume_fuel_energy, produce_energy, 20, &manager->event_queue);
 
     // Add systems to the manager's system array
+    printf("Debug: Adding systems to SystemArray...\n");
     system_array_add(&manager->system_array, propulsion);
     system_array_add(&manager->system_array, life_support);
     system_array_add(&manager->system_array, crew_capsule);
     system_array_add(&manager->system_array, generator);
+
+    printf("Debug: Finished loading data into the manager.\n");
 }
