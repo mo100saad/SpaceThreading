@@ -1,0 +1,106 @@
+***** Running under ThreadSanitizer v3 (pid 53832) *****
+==================
+WARNING: ThreadSanitizer: data race (pid=53832)
+  Write of size 4 at 0x721000000088 by thread T4 (mutexes: write M0):
+    #0 system_store_resources /home/student/Documents/project2/system.c:196 (cuinspace+0x3b89) (BuildId: 667773097659a5b8a5cb8af5bb789e1ba4d5249a)
+    #1 system_run /home/student/Documents/project2/system.c:94 (cuinspace+0x3759) (BuildId: 667773097659a5b8a5cb8af5bb789e1ba4d5249a)
+    #2 system_thread_func /home/student/Documents/project2/manager.c:108 (cuinspace+0x28f9) (BuildId: 667773097659a5b8a5cb8af5bb789e1ba4d5249a)
+
+  Previous read of size 4 at 0x721000000088 by thread T2:
+    #0 system_run /home/student/Documents/project2/system.c:85 (cuinspace+0x36c6) (BuildId: 667773097659a5b8a5cb8af5bb789e1ba4d5249a)
+    #1 system_thread_func /home/student/Documents/project2/manager.c:108 (cuinspace+0x28f9) (BuildId: 667773097659a5b8a5cb8af5bb789e1ba4d5249a)
+
+  As if synchronized via sleep:
+    #0 usleep ../../../../src/libsanitizer/tsan/tsan_interceptors_posix.cpp:390 (libtsan.so.2+0x587d1) (BuildId: 38097064631f7912bd33117a9c83d08b42e15571)
+    #1 system_simulate_process_time /home/student/Documents/project2/system.c:169 (cuinspace+0x3a6d) (BuildId: 667773097659a5b8a5cb8af5bb789e1ba4d5249a)
+    #2 system_convert /home/student/Documents/project2/system.c:133 (cuinspace+0x3930) (BuildId: 667773097659a5b8a5cb8af5bb789e1ba4d5249a)
+    #3 system_run /home/student/Documents/project2/system.c:81 (cuinspace+0x3695) (BuildId: 667773097659a5b8a5cb8af5bb789e1ba4d5249a)
+    #4 system_thread_func /home/student/Documents/project2/manager.c:108 (cuinspace+0x28f9) (BuildId: 667773097659a5b8a5cb8af5bb789e1ba4d5249a)
+
+  Location is heap block of size 56 at 0x721000000080 allocated by main thread:
+    #0 malloc ../../../../src/libsanitizer/tsan/tsan_interceptors_posix.cpp:665 (libtsan.so.2+0x54b3f) (BuildId: 38097064631f7912bd33117a9c83d08b42e15571)
+    #1 resource_create /home/student/Documents/project2/resource.c:21 (cuinspace+0x2c16) (BuildId: 667773097659a5b8a5cb8af5bb789e1ba4d5249a)
+    #2 load_data /home/student/Documents/project2/main.c:55 (cuinspace+0x1ca3) (BuildId: 667773097659a5b8a5cb8af5bb789e1ba4d5249a)
+    #3 main /home/student/Documents/project2/main.c:23 (cuinspace+0x1b84) (BuildId: 667773097659a5b8a5cb8af5bb789e1ba4d5249a)
+
+  Mutex M0 (0x721000000090) created at:
+    #0 pthread_mutex_init ../../../../src/libsanitizer/tsan/tsan_interceptors_posix.cpp:1315 (libtsan.so.2+0x594cd) (BuildId: 38097064631f7912bd33117a9c83d08b42e15571)
+    #1 resource_create /home/student/Documents/project2/resource.c:38 (cuinspace+0x2d9b) (BuildId: 667773097659a5b8a5cb8af5bb789e1ba4d5249a)
+    #2 load_data /home/student/Documents/project2/main.c:55 (cuinspace+0x1ca3) (BuildId: 667773097659a5b8a5cb8af5bb789e1ba4d5249a)
+    #3 main /home/student/Documents/project2/main.c:23 (cuinspace+0x1b84) (BuildId: 667773097659a5b8a5cb8af5bb789e1ba4d5249a)
+
+  Thread T4 (tid=53857, running) created by main thread at:
+    #0 pthread_create ../../../../src/libsanitizer/tsan/tsan_interceptors_posix.cpp:1022 (libtsan.so.2+0x5ac1a) (BuildId: 38097064631f7912bd33117a9c83d08b42e15571)
+    #1 manager_run /home/student/Documents/project2/manager.c:54 (cuinspace+0x2567) (BuildId: 667773097659a5b8a5cb8af5bb789e1ba4d5249a)
+    #2 main /home/student/Documents/project2/main.c:27 (cuinspace+0x1b9f) (BuildId: 667773097659a5b8a5cb8af5bb789e1ba4d5249a)
+
+  Thread T2 (tid=53855, running) created by main thread at:
+    #0 pthread_create ../../../../src/libsanitizer/tsan/tsan_interceptors_posix.cpp:1022 (libtsan.so.2+0x5ac1a) (BuildId: 38097064631f7912bd33117a9c83d08b42e15571)
+    #1 manager_run /home/student/Documents/project2/manager.c:54 (cuinspace+0x2567) (BuildId: 667773097659a5b8a5cb8af5bb789e1ba4d5249a)
+    #2 main /home/student/Documents/project2/main.c:27 (cuinspace+0x1b9f) (BuildId: 667773097659a5b8a5cb8af5bb789e1ba4d5249a)
+
+SUMMARY: ThreadSanitizer: data race /home/student/Documents/project2/system.c:196 in system_store_resources
+==================
+==================
+WARNING: ThreadSanitizer: data race (pid=53832)
+  Write of size 4 at 0x721000000130 by main thread:
+    #0 manager_run /home/student/Documents/project2/manager.c:80 (cuinspace+0x27af) (BuildId: 667773097659a5b8a5cb8af5bb789e1ba4d5249a)
+    #1 main /home/student/Documents/project2/main.c:27 (cuinspace+0x1b9f) (BuildId: 667773097659a5b8a5cb8af5bb789e1ba4d5249a)
+
+  Previous read of size 4 at 0x721000000130 by thread T1:
+    #0 system_simulate_process_time /home/student/Documents/project2/system.c:157 (cuinspace+0x39ed) (BuildId: 667773097659a5b8a5cb8af5bb789e1ba4d5249a)
+    #1 system_convert /home/student/Documents/project2/system.c:133 (cuinspace+0x3930) (BuildId: 667773097659a5b8a5cb8af5bb789e1ba4d5249a)
+    #2 system_run /home/student/Documents/project2/system.c:81 (cuinspace+0x3695) (BuildId: 667773097659a5b8a5cb8af5bb789e1ba4d5249a)
+    #3 system_thread_func /home/student/Documents/project2/manager.c:108 (cuinspace+0x28f9) (BuildId: 667773097659a5b8a5cb8af5bb789e1ba4d5249a)
+
+  As if synchronized via sleep:
+    #0 usleep ../../../../src/libsanitizer/tsan/tsan_interceptors_posix.cpp:390 (libtsan.so.2+0x587d1) (BuildId: 38097064631f7912bd33117a9c83d08b42e15571)
+    #1 manager_run /home/student/Documents/project2/manager.c:88 (cuinspace+0x2819) (BuildId: 667773097659a5b8a5cb8af5bb789e1ba4d5249a)
+    #2 main /home/student/Documents/project2/main.c:27 (cuinspace+0x1b9f) (BuildId: 667773097659a5b8a5cb8af5bb789e1ba4d5249a)
+
+  Location is heap block of size 64 at 0x721000000100 allocated by main thread:
+    #0 malloc ../../../../src/libsanitizer/tsan/tsan_interceptors_posix.cpp:665 (libtsan.so.2+0x54b3f) (BuildId: 38097064631f7912bd33117a9c83d08b42e15571)
+    #1 system_create /home/student/Documents/project2/system.c:27 (cuinspace+0x338e) (BuildId: 667773097659a5b8a5cb8af5bb789e1ba4d5249a)
+    #2 load_data /home/student/Documents/project2/main.c:75 (cuinspace+0x1e55) (BuildId: 667773097659a5b8a5cb8af5bb789e1ba4d5249a)
+    #3 main /home/student/Documents/project2/main.c:23 (cuinspace+0x1b84) (BuildId: 667773097659a5b8a5cb8af5bb789e1ba4d5249a)
+
+  Thread T1 (tid=53854, running) created by main thread at:
+    #0 pthread_create ../../../../src/libsanitizer/tsan/tsan_interceptors_posix.cpp:1022 (libtsan.so.2+0x5ac1a) (BuildId: 38097064631f7912bd33117a9c83d08b42e15571)
+    #1 manager_run /home/student/Documents/project2/manager.c:54 (cuinspace+0x2567) (BuildId: 667773097659a5b8a5cb8af5bb789e1ba4d5249a)
+    #2 main /home/student/Documents/project2/main.c:27 (cuinspace+0x1b9f) (BuildId: 667773097659a5b8a5cb8af5bb789e1ba4d5249a)
+
+SUMMARY: ThreadSanitizer: data race /home/student/Documents/project2/manager.c:80 in manager_run
+==================
+==================
+WARNING: ThreadSanitizer: data race (pid=53832)
+  Write of size 4 at 0x7210000001b0 by main thread:
+    #0 manager_run /home/student/Documents/project2/manager.c:80 (cuinspace+0x27af) (BuildId: 667773097659a5b8a5cb8af5bb789e1ba4d5249a)
+    #1 main /home/student/Documents/project2/main.c:27 (cuinspace+0x1b9f) (BuildId: 667773097659a5b8a5cb8af5bb789e1ba4d5249a)
+
+  Previous read of size 4 at 0x7210000001b0 by thread T3:
+    #0 system_thread_func /home/student/Documents/project2/manager.c:107 (cuinspace+0x2909) (BuildId: 667773097659a5b8a5cb8af5bb789e1ba4d5249a)
+
+  Location is heap block of size 64 at 0x721000000180 allocated by main thread:
+    #0 malloc ../../../../src/libsanitizer/tsan/tsan_interceptors_posix.cpp:665 (libtsan.so.2+0x54b3f) (BuildId: 38097064631f7912bd33117a9c83d08b42e15571)
+    #1 system_create /home/student/Documents/project2/system.c:27 (cuinspace+0x338e) (BuildId: 667773097659a5b8a5cb8af5bb789e1ba4d5249a)
+    #2 load_data /home/student/Documents/project2/main.c:99 (cuinspace+0x2125) (BuildId: 667773097659a5b8a5cb8af5bb789e1ba4d5249a)
+    #3 main /home/student/Documents/project2/main.c:23 (cuinspace+0x1b84) (BuildId: 667773097659a5b8a5cb8af5bb789e1ba4d5249a)
+
+  Thread T3 (tid=53856, running) created by main thread at:
+    #0 pthread_create ../../../../src/libsanitizer/tsan/tsan_interceptors_posix.cpp:1022 (libtsan.so.2+0x5ac1a) (BuildId: 38097064631f7912bd33117a9c83d08b42e15571)
+    #1 manager_run /home/student/Documents/project2/manager.c:54 (cuinspace+0x2567) (BuildId: 667773097659a5b8a5cb8af5bb789e1ba4d5249a)
+    #2 main /home/student/Documents/project2/main.c:27 (cuinspace+0x1b9f) (BuildId: 667773097659a5b8a5cb8af5bb789e1ba4d5249a)
+
+SUMMARY: ThreadSanitizer: data race /home/student/Documents/project2/manager.c:80 in manager_run
+==================
+Stats: SizeClassAllocator64: 0M mapped (0M rss) in 2112 allocations; remains 846
+  01 (    16): mapped:     64K allocs:     128 frees:       0 inuse:    128 num_freed_chunks    3968 avail:   4096 rss:      4K releases:      0 last released:      0K region: 0x720400000000
+  02 (    32): mapped:     64K allocs:     640 frees:     512 inuse:    128 num_freed_chunks    1920 avail:   2048 rss:     20K releases:      0 last released:      0K region: 0x720800000000
+  04 (    64): mapped:     64K allocs:     128 frees:       0 inuse:    128 num_freed_chunks     896 avail:   1024 rss:      4K releases:      0 last released:      0K region: 0x721000000000
+  05 (    80): mapped:     64K allocs:     384 frees:     242 inuse:    142 num_freed_chunks     677 avail:    819 rss:     12K releases:      0 last released:      0K region: 0x721400000000
+  06 (    96): mapped:     64K allocs:     128 frees:       0 inuse:    128 num_freed_chunks     554 avail:    682 rss:      4K releases:      0 last released:      0K region: 0x721800000000
+  10 (   160): mapped:    128K allocs:     512 frees:     512 inuse:      0 num_freed_chunks     819 avail:    819 rss:     20K releases:      0 last released:      0K region: 0x722800000000
+  17 (   320): mapped:     64K allocs:     128 frees:       0 inuse:    128 num_freed_chunks      76 avail:    204 rss:      4K releases:      0 last released:      0K region: 0x724400000000
+  24 (  1024): mapped:     64K allocs:      64 frees:       0 inuse:     64 num_freed_chunks       0 avail:     64 rss:      4K releases:      0 last released:      0K region: 0x726000000000
+Stats: LargeMmapAllocator: allocated 0 times, remains 0 (0 K) max 0 M; by size logs: 
+ThreadSanitizer: reported 3 warnings

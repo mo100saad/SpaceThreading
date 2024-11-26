@@ -48,14 +48,21 @@ void manager_run(Manager *manager) {
         manager->simulation_running = 0;
         return;
     }
-
-    // Create threads for each system
+// Create threads for each system
     for (int i = 0; i < manager->system_array.size; i++) {
-        if (pthread_create(&threads[i], NULL, system_thread_func, manager->system_array.systems[i]) != 0) {
-            fprintf(stderr, "Error: Failed to create thread for system.\n");
+        System *system = manager->system_array.systems[i];
+        if (system == NULL) {
+            fprintf(stderr, "Error: System at index %d is NULL.\n", i);
+            continue; // Skip this system and proceed with the next
+        }
+
+        if (pthread_create(&threads[i], NULL, system_thread_func, system) != 0) {
+            fprintf(stderr, "Error: Failed to create thread for system: %s.\n", system->name);
             exit(EXIT_FAILURE);
         }
     }
+    
+
 
     // Main manager loop
     while (manager->simulation_running) {
@@ -75,10 +82,17 @@ void manager_run(Manager *manager) {
                 printf("Critical resource [%s] depleted by system [%s].\n", event.resource->name, event.system->name);
                 manager->simulation_running = 0;
 
-                // Set all systems to TERMINATE
-                for (int i = 0; i < manager->system_array.size; i++) {
-                    manager->system_array.systems[i]->status = TERMINATE;
+               // Set all systems to TERMINATE
+               for (int i = 0; i < manager->system_array.size; i++) {
+                    System *system = manager->system_array.systems[i];
+                    if (system != NULL) {
+                        pthread_mutex_lock(&system->mutex); // Lock before writing
+                        system->status = TERMINATE;
+                        pthread_mutex_unlock(&system->mutex); // Unlock after writing
+                        printf("Debug: System %s status set to TERMINATE.\n", system->name);
+                    }
                 }
+
                 break;
             }
         }
@@ -104,8 +118,15 @@ void manager_run(Manager *manager) {
 static void *system_thread_func(void *arg) {
     System *system = (System *)arg;
 
-    while (system->status != TERMINATE) {
-        system_run(system);
+    while (1) {
+        pthread_mutex_lock(&system->mutex); // Lock before reading the status
+        if (system->status == TERMINATE) {
+            pthread_mutex_unlock(&system->mutex); // Unlock before breaking
+            break;
+        }
+        pthread_mutex_unlock(&system->mutex); // Unlock after reading
+
+        system_run(system); // Continue running the system
     }
 
     return NULL;
@@ -117,19 +138,18 @@ static void *system_thread_func(void *arg) {
  * Outputs the statuses of all resources and systems to the console.
  */
 static void display_simulation_state(Manager *manager) {
-    static const int display_interval = 1; // Update interval in seconds
+    static const int display_interval = 1;
     static time_t last_display_time = 0;
 
     time_t current_time = time(NULL);
     if (difftime(current_time, last_display_time) < display_interval) {
-        return; // Skip display if it's not time yet
+        return;
     }
 
     printf(ANSI_CLEAR ANSI_MV_TL);
     printf("Current Resource Amounts:\n");
     printf("-------------------------\n");
 
-    // Display resources
     for (int i = 0; i < manager->resource_array.size; i++) {
         Resource *resource = manager->resource_array.resources[i];
         pthread_mutex_lock(&resource->mutex);
@@ -140,10 +160,9 @@ static void display_simulation_state(Manager *manager) {
     printf("\nSystem Statuses:\n");
     printf("---------------\n");
 
-    // Display systems
     for (int i = 0; i < manager->system_array.size; i++) {
         System *system = manager->system_array.systems[i];
-        printf("%s: %s\n", system->name, 
+        printf("%s: %s\n", system->name,
                (system->status == TERMINATE) ? "TERMINATE" : "ACTIVE");
     }
 
@@ -152,3 +171,4 @@ static void display_simulation_state(Manager *manager) {
 
     last_display_time = current_time;
 }
+

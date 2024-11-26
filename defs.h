@@ -53,6 +53,7 @@ typedef struct System {
     int processing_time;
     int status; 
     struct EventQueue *event_queue;  // Pointer to event queue shared by all systems and manager
+    pthread_mutex_t mutex;
 } System;
 
 // Used to send notifications to the manager about an issue / state of the system
@@ -68,12 +69,14 @@ typedef struct Event {
 typedef struct EventNode {
     Event event;
     struct EventNode *next;
+    pthread_mutex_t mutex; 
 } EventNode;
 
 // Linked List structure with a head and no tail, single instance shared by all systems
 typedef struct EventQueue {
     EventNode *head;
     int size;
+    pthread_mutex_t mutex; 
 } EventQueue;
 
 // A basic dynamic array to store all of the systems in the simulation

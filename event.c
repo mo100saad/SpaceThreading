@@ -32,6 +32,11 @@ void event_init(Event *event, System *system, Resource *resource, int status, in
 void event_queue_init(EventQueue *queue) {
     queue->head = NULL;
     queue->size = 0;
+    //Check if its null
+    if (pthread_mutex_init(&queue->mutex, NULL) != 0) {
+        fprintf(stderr, "Error: Failed to initialize mutex for EventQueue.\n");
+        exit(EXIT_FAILURE);
+    }
 }
 
 /**
@@ -53,7 +58,10 @@ void event_queue_clean(EventQueue *queue) {
 
     queue->head = NULL;
     queue->size = 0;
+
+    pthread_mutex_destroy(&queue->mutex);  // Destroy the mutex, ensure no memory leak
 }
+
 
 /**
  * Pushes an `Event` onto the `EventQueue`.
@@ -64,16 +72,17 @@ void event_queue_clean(EventQueue *queue) {
  * @param[in]     event  Pointer to the `Event` to push onto the queue.
  */
 void event_queue_push(EventQueue *queue, const Event *event) {
+    pthread_mutex_lock(&queue->mutex);  // Lock the mutex
     EventNode *new_node = malloc(sizeof(EventNode));
     if (new_node == NULL) {
         fprintf(stderr, "Error: Memory allocation failed for EventNode.\n");
+        pthread_mutex_unlock(&queue->mutex);  // Unlock before exiting
         exit(EXIT_FAILURE);
     }
 
     new_node->event = *event;
     new_node->next = NULL;
 
-    // Insert in priority order
     if (queue->head == NULL || queue->head->event.priority < event->priority) {
         new_node->next = queue->head;
         queue->head = new_node;
@@ -87,7 +96,10 @@ void event_queue_push(EventQueue *queue, const Event *event) {
     }
 
     queue->size++;
+    pthread_mutex_unlock(&queue->mutex);  // Unlock the mutex
 }
+
+
 
 /**
  * Pops an `Event` from the `EventQueue`.
@@ -99,7 +111,9 @@ void event_queue_push(EventQueue *queue, const Event *event) {
  * @return               Non-zero if an event was successfully popped; zero otherwise.
  */
 int event_queue_pop(EventQueue *queue, Event *event) {
+    pthread_mutex_lock(&queue->mutex);  // Lock the mutex
     if (queue->head == NULL) {
+        pthread_mutex_unlock(&queue->mutex);  // Unlock before returning
         return 0; // Queue is empty
     }
 
@@ -110,5 +124,6 @@ int event_queue_pop(EventQueue *queue, Event *event) {
     free(node_to_remove);
     queue->size--;
 
+    pthread_mutex_unlock(&queue->mutex);  // Unlock the mutex
     return 1;
 }

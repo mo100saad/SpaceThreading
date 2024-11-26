@@ -1,0 +1,106 @@
+***** Running under ThreadSanitizer v3 (pid 52855) *****
+==================
+WARNING: ThreadSanitizer: data race (pid=52855)
+  Write of size 4 at 0x7b1000000088 by thread T4 (mutexes: write M0):
+    #0 system_store_resources /home/student/Documents/project2/system.c:196 (cuinspace+0xc6970) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+    #1 system_run /home/student/Documents/project2/system.c:94 (cuinspace+0xc6540) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+    #2 system_thread_func /home/student/Documents/project2/manager.c:108 (cuinspace+0xc56e0) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+
+  Previous read of size 4 at 0x7b1000000088 by thread T2:
+    #0 system_run /home/student/Documents/project2/system.c:85 (cuinspace+0xc64ad) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+    #1 system_thread_func /home/student/Documents/project2/manager.c:108 (cuinspace+0xc56e0) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+
+  As if synchronized via sleep:
+    #0 usleep <null> (cuinspace+0x3e21d) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+    #1 system_simulate_process_time /home/student/Documents/project2/system.c:169 (cuinspace+0xc6854) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+    #2 system_convert /home/student/Documents/project2/system.c:133 (cuinspace+0xc6717) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+    #3 system_run /home/student/Documents/project2/system.c:81 (cuinspace+0xc647c) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+    #4 system_thread_func /home/student/Documents/project2/manager.c:108 (cuinspace+0xc56e0) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+
+  Location is heap block of size 56 at 0x7b1000000080 allocated by main thread:
+    #0 malloc <null> (cuinspace+0x1c867) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+    #1 resource_create /home/student/Documents/project2/resource.c:21 (cuinspace+0xc59fd) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+    #2 load_data /home/student/Documents/project2/main.c:55 (cuinspace+0xc4a8a) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+    #3 main /home/student/Documents/project2/main.c:23 (cuinspace+0xc496b) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+
+  Mutex M0 (0x7b1000000090) created at:
+    #0 pthread_mutex_init <null> (cuinspace+0x1dd46) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+    #1 resource_create /home/student/Documents/project2/resource.c:38 (cuinspace+0xc5b82) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+    #2 load_data /home/student/Documents/project2/main.c:55 (cuinspace+0xc4a8a) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+    #3 main /home/student/Documents/project2/main.c:23 (cuinspace+0xc496b) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+
+  Thread T4 (tid=52878, running) created by main thread at:
+    #0 pthread_create <null> (cuinspace+0x1d719) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+    #1 manager_run /home/student/Documents/project2/manager.c:54 (cuinspace+0xc534e) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+    #2 main /home/student/Documents/project2/main.c:27 (cuinspace+0xc4986) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+
+  Thread T2 (tid=52876, running) created by main thread at:
+    #0 pthread_create <null> (cuinspace+0x1d719) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+    #1 manager_run /home/student/Documents/project2/manager.c:54 (cuinspace+0xc534e) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+    #2 main /home/student/Documents/project2/main.c:27 (cuinspace+0xc4986) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+
+SUMMARY: ThreadSanitizer: data race /home/student/Documents/project2/system.c:196 in system_store_resources
+==================
+==================
+WARNING: ThreadSanitizer: data race (pid=52855)
+  Write of size 4 at 0x7b1000000130 by main thread:
+    #0 manager_run /home/student/Documents/project2/manager.c:80 (cuinspace+0xc5596) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+    #1 main /home/student/Documents/project2/main.c:27 (cuinspace+0xc4986) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+
+  Previous read of size 4 at 0x7b1000000130 by thread T1:
+    #0 system_simulate_process_time /home/student/Documents/project2/system.c:157 (cuinspace+0xc67d4) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+    #1 system_convert /home/student/Documents/project2/system.c:133 (cuinspace+0xc6717) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+    #2 system_run /home/student/Documents/project2/system.c:81 (cuinspace+0xc647c) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+    #3 system_thread_func /home/student/Documents/project2/manager.c:108 (cuinspace+0xc56e0) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+
+  As if synchronized via sleep:
+    #0 usleep <null> (cuinspace+0x3e21d) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+    #1 manager_run /home/student/Documents/project2/manager.c:88 (cuinspace+0xc5600) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+    #2 main /home/student/Documents/project2/main.c:27 (cuinspace+0xc4986) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+
+  Location is heap block of size 64 at 0x7b1000000100 allocated by main thread:
+    #0 malloc <null> (cuinspace+0x1c867) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+    #1 system_create /home/student/Documents/project2/system.c:27 (cuinspace+0xc6175) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+    #2 load_data /home/student/Documents/project2/main.c:75 (cuinspace+0xc4c3c) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+    #3 main /home/student/Documents/project2/main.c:23 (cuinspace+0xc496b) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+
+  Thread T1 (tid=52875, running) created by main thread at:
+    #0 pthread_create <null> (cuinspace+0x1d719) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+    #1 manager_run /home/student/Documents/project2/manager.c:54 (cuinspace+0xc534e) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+    #2 main /home/student/Documents/project2/main.c:27 (cuinspace+0xc4986) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+
+SUMMARY: ThreadSanitizer: data race /home/student/Documents/project2/manager.c:80 in manager_run
+==================
+==================
+WARNING: ThreadSanitizer: data race (pid=52855)
+  Write of size 4 at 0x7b10000001b0 by main thread:
+    #0 manager_run /home/student/Documents/project2/manager.c:80 (cuinspace+0xc5596) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+    #1 main /home/student/Documents/project2/main.c:27 (cuinspace+0xc4986) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+
+  Previous read of size 4 at 0x7b10000001b0 by thread T3:
+    #0 system_thread_func /home/student/Documents/project2/manager.c:107 (cuinspace+0xc56f0) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+
+  Location is heap block of size 64 at 0x7b1000000180 allocated by main thread:
+    #0 malloc <null> (cuinspace+0x1c867) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+    #1 system_create /home/student/Documents/project2/system.c:27 (cuinspace+0xc6175) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+    #2 load_data /home/student/Documents/project2/main.c:99 (cuinspace+0xc4f0c) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+    #3 main /home/student/Documents/project2/main.c:23 (cuinspace+0xc496b) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+
+  Thread T3 (tid=52877, running) created by main thread at:
+    #0 pthread_create <null> (cuinspace+0x1d719) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+    #1 manager_run /home/student/Documents/project2/manager.c:54 (cuinspace+0xc534e) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+    #2 main /home/student/Documents/project2/main.c:27 (cuinspace+0xc4986) (BuildId: a90b7b24df6f78c9ef83f127963c1a2050ac3394)
+
+SUMMARY: ThreadSanitizer: data race /home/student/Documents/project2/manager.c:80 in manager_run
+==================
+Stats: SizeClassAllocator64: 0M mapped (0M rss) in 2112 allocations; remains 842
+  01 (    16): mapped:     64K allocs:     128 frees:       0 inuse:    128 num_freed_chunks    3968 avail:   4096 rss:      4K releases:      0 last released:      0K region: 0x7b0400000000
+  02 (    32): mapped:     64K allocs:     640 frees:     512 inuse:    128 num_freed_chunks    1920 avail:   2048 rss:     20K releases:      0 last released:      0K region: 0x7b0800000000
+  04 (    64): mapped:     64K allocs:     128 frees:       0 inuse:    128 num_freed_chunks     896 avail:   1024 rss:      4K releases:      0 last released:      0K region: 0x7b1000000000
+  05 (    80): mapped:     64K allocs:     384 frees:     246 inuse:    138 num_freed_chunks     681 avail:    819 rss:     12K releases:      0 last released:      0K region: 0x7b1400000000
+  06 (    96): mapped:     64K allocs:     128 frees:       0 inuse:    128 num_freed_chunks     554 avail:    682 rss:      4K releases:      0 last released:      0K region: 0x7b1800000000
+  10 (   160): mapped:    128K allocs:     512 frees:     512 inuse:      0 num_freed_chunks     819 avail:    819 rss:     20K releases:      0 last released:      0K region: 0x7b2800000000
+  17 (   320): mapped:     64K allocs:     128 frees:       0 inuse:    128 num_freed_chunks      76 avail:    204 rss:      4K releases:      0 last released:      0K region: 0x7b4400000000
+  24 (  1024): mapped:     64K allocs:      64 frees:       0 inuse:     64 num_freed_chunks       0 avail:     64 rss:      4K releases:      0 last released:      0K region: 0x7b6000000000
+Stats: LargeMmapAllocator: allocated 0 times, remains 0 (0 K) max 0 M; by size logs: 
+ThreadSanitizer: reported 3 warnings

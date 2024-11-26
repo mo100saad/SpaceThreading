@@ -30,7 +30,7 @@ void system_create(System **system, const char *name, ResourceAmount consumed, R
         exit(EXIT_FAILURE);
     }
 
-    (*system)->name = strdup(name); // Duplicate the name
+    (*system)->name = strdup(name);
     if ((*system)->name == NULL) {
         fprintf(stderr, "Error: Memory allocation failed for System name.\n");
         free(*system);
@@ -43,7 +43,9 @@ void system_create(System **system, const char *name, ResourceAmount consumed, R
     (*system)->processing_time = processing_time;
     (*system)->status = STANDARD;
     (*system)->event_queue = event_queue;
+    pthread_mutex_init(&(*system)->mutex, NULL); // Initialize the mutex
 }
+
 
 /**
  * Destroys a `System` object.
@@ -58,9 +60,11 @@ void system_destroy(System *system) {
             printf("Debug: Freeing system name: %s\n", system->name);
             free(system->name); // Free dynamically allocated name
         }
+        pthread_mutex_destroy(&system->mutex); // Destroy the mutex
         free(system); // Free the System
     }
 }
+
 
 
 /**
@@ -116,17 +120,17 @@ static int system_convert(System *system) {
     Resource *consumed_resource = system->consumed.resource;
     int amount_consumed = system->consumed.amount;
 
-    // Convert without consuming anything if no resource is consumed
     if (consumed_resource == NULL) {
         status = STATUS_OK;
     } else {
-        // Attempt to consume the required resources
+        pthread_mutex_lock(&consumed_resource->mutex);
         if (consumed_resource->amount >= amount_consumed) {
             consumed_resource->amount -= amount_consumed;
             status = STATUS_OK;
         } else {
             status = (consumed_resource->amount == 0) ? STATUS_EMPTY : STATUS_INSUFFICIENT;
         }
+        pthread_mutex_unlock(&consumed_resource->mutex);
     }
 
     if (status == STATUS_OK) {
@@ -134,8 +138,7 @@ static int system_convert(System *system) {
 
         if (system->produced.resource != NULL) {
             system->amount_stored += system->produced.amount;
-        }
-        else {
+        } else {
             system->amount_stored = 0;
         }
     }
@@ -184,33 +187,27 @@ static int system_store_resources(System *system) {
     Resource *produced_resource = system->produced.resource;
     int available_space, amount_to_store;
 
-    // Skip if there's nothing to store
     if (produced_resource == NULL || system->amount_stored == 0) {
         system->amount_stored = 0;
         return STATUS_OK;
     }
 
+    pthread_mutex_lock(&produced_resource->mutex);
     amount_to_store = system->amount_stored;
-
-    // Calculate available space
     available_space = produced_resource->max_capacity - produced_resource->amount;
 
     if (available_space >= amount_to_store) {
-        // Store all produced resources
         produced_resource->amount += amount_to_store;
         system->amount_stored = 0;
     } else if (available_space > 0) {
-        // Store as much as possible
         produced_resource->amount += available_space;
         system->amount_stored = amount_to_store - available_space;
     }
+    pthread_mutex_unlock(&produced_resource->mutex);
 
-    if (system->amount_stored != 0) {
-        return STATUS_CAPACITY;
-    }
-
-    return STATUS_OK;
+    return (system->amount_stored == 0) ? STATUS_OK : STATUS_CAPACITY;
 }
+
 
 /**
  * Initializes the `SystemArray`.
