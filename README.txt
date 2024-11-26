@@ -52,12 +52,6 @@ Valgrind User Manual:
 
 Valgrind – Tool for memory debugging.
 
-Dynamic Memory Management in C:
-
-GeeksforGeeks
-
-The C Programming Language by Brian W. Kernighan and Dennis M. Ritchie.
-
 Event Queue Implementations:
 
 General examples of priority queues and linked lists from online coding platforms.
@@ -99,7 +93,7 @@ Resource Capacity Management:
 
 Systems respect the maximum capacity of resources and handle overflow gracefully by generating events.
 
-Usage Tips
+Usage Tips - Helpful things we found when running!
 Debugging Mode:
 
 Enable detailed debug logs by ensuring the DEBUG macro is set to 1 in the source files.
@@ -133,4 +127,4 @@ Stress Testing:
 
 Test cases include scenarios with multiple high-priority events, concurrent resource usage, and simultaneous system activity to verify thread safety and event handling.
 
-Thank you for using the CUinSPACE Simulated Flight program! If you have any questions, feel free to contact us for further information or support.
+Thank you so much for using the CUinSPACE Simulated Flight program! If you have any questions let us know right away and, feel free to contact us for further information or support.
