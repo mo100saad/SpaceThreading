@@ -1,6 +1,6 @@
-CUinSPACE Simulated Flight - README
+SpaceThreading Simulated Flight - README
 Overview
-This is the CUinSPACE Simulated Flight program! This application is designed to simulate the management of rocket subsystems using a multithreaded architecture. The simulation involves multiple systems consuming and producing resources while a central manager oversees the overall operation. The program demonstrates key programming concepts, including dynamic memory management, multithreading, synchronization using semaphores, and priority-based event handling.
+This is the SpaceThreading Simulated Flight program! This application is designed to simulate the management of rocket subsystems using a multithreaded architecture. The simulation involves multiple systems consuming and producing resources while a central manager oversees the overall operation. The program demonstrates key programming concepts, including dynamic memory management, multithreading, synchronization using semaphores, and priority-based event handling.
 
 This README will guide you through compiling, running, and understanding the program.
 
@@ -23,12 +23,12 @@ Run the following command:
     - make
 
 
-This will create an executable file named cuinspace.
+This will create an executable file named SpaceThreading.
 
 Run the Program:
 
 Execute the compiled program with:
-    - ./cuinspace
+    - ./SpaceThreading
 
 
 Clean Up Build Artifacts:
@@ -40,11 +40,11 @@ To remove object files and the executable:
 Optional Debugging and Memory Check:
 
 To test for memory leaks and invalid memory usage, use:
-    - valgrind --leak-check=full --track-origins=yes ./cuinspace
+    - valgrind --leak-check=full --track-origins=yes ./SpaceThreading
 
 
 Citations
-The development of this project was supported by various learning and debugging resources. Below are the key sources referenced during the creation of CUinSPACE Simulated Flight:
+The development of this project was supported by various learning and debugging resources. Below are the key sources referenced during the creation of SpaceThreading Simulated Flight:
 
 COMP2401 Course Materials: Lecture notes, assignments, and tutorials.
 
@@ -61,9 +61,9 @@ Stack Overflow: Helpful for troubleshooting complex memory and threading issues.
 Contributors
 We, the following individuals contributed to the development of this project:
 
-Roshan Kanagarajah (101311484)
+Roshan Kanagarajah
 
-Mohammad Saad (101306472)
+Mohammad Saad
 
 Questions and Assumptions
 Input and Output Behavior
@@ -127,4 +127,4 @@ Stress Testing:
 
 Test cases include scenarios with multiple high-priority events, concurrent resource usage, and simultaneous system activity to verify thread safety and event handling.
 
-Thank you so much for using the CUinSPACE Simulated Flight program! If you have any questions let us know right away and, feel free to contact us for further information or support.
+Thank you so much for using the SpaceThreading Simulated Flight program! If you have any questions let us know right away and, feel free to contact us for further information or support.
